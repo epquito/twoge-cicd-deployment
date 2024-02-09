@@ -2,12 +2,12 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: twoge-vpc
-  namespace: default 
+  namespace: edwin
 spec:
   storageClassName: twoge-storage
   resources:
     requests:
-      storage: 2Gi
+      storage: 1Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
