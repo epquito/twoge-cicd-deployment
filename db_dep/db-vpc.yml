@@ -7,7 +7,7 @@ spec:
   storageClassName: db-storage
   resources:
     requests:
-      storage: 1Gi
+      storage: 2Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
