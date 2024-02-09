@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: twoge-db
+  namespace: edwin
+spec:
+  selector:
+    matchLabels:
+      app: twoge-db
+  template:
+    metadata:
+      labels:
+        app: twoge-db
+    spec:
+      containers:
+      - name: twoge-db
+        image: postgres
+        volumeMounts:
+        - name: db-data 
+          mountPath: /var/lib/postgresql/data
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1Gi
+          requests:
+            cpu: "0.5"
+            memory: 500Mi
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: username
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: database
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: password
+        startupProbe:
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+          exec:
+            command:
+              - pg_isready
+              - -q 
+              - -d 
+              - twoge 
+              - -U 
+              - cp2023
+        ports:
+        - containerPort: 5432
+      volumes:
+      - name: db-data
+        persistentVolumeClaim:
+          claimName: db-vpc
+
