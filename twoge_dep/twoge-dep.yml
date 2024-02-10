@@ -23,9 +23,9 @@ spec:
           requests:
             cpu: "0.5"
             memory: 500Mi
-        volumeMounts:
-        - name: data-volume
-          mountPath: /data
+#       volumeMounts:
+#       - name: data-volume
+#         mountPath: /data
 
         env:
         - name: SQLALCHEMY_DATABASE_URI
