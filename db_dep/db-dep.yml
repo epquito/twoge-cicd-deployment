@@ -15,9 +15,9 @@ spec:
       containers:
       - name: twoge-db
         image: postgres
-        volumeMounts:
-        - name: db-data 
-          mountPath: /var/lib/postgresql/data
+#        volumeMounts:
+#        - name: db-data 
+#          mountPath: /var/lib/postgresql/data
         resources:
           limits:
             cpu: "1"
