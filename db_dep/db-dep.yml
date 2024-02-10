@@ -15,16 +15,16 @@ spec:
       containers:
       - name: twoge-db
         image: postgres
-        volumeMounts:
-        - name: db-data 
-          mountPath: /var/lib/postgresql/data
-        resources:
-          limits:
-            cpu: "1"
-            memory: 1Gi
-          requests:
-            cpu: "0.5"
-            memory: 500Mi
+#        volumeMounts:
+#        - name: db-data 
+#          mountPath: /var/lib/postgresql/data
+#        resources:
+#          limits:
+#            cpu: "1"
+#            memory: 1Gi
+#          requests:
+#            cpu: "0.5"
+#            memory: 500Mi
         env:
         - name: POSTGRES_USER
           valueFrom:
@@ -57,8 +57,8 @@ spec:
               - cp2023
         ports:
         - containerPort: 5432
-      volumes:
-      - name: db-data
-        persistentVolumeClaim:
-          claimName: db-vpc
+#      volumes:
+#      - name: db-data
+#        persistentVolumeClaim:
+#          claimName: db-vpc
 
