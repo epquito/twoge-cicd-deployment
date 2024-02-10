@@ -18,11 +18,11 @@ spec:
         image: epquito/twoge-flask:v1
         resources:
           limits:
-            cpu: "0.5"
-            memory: 500Gi
-          requests:
             cpu: "0.25"
-            memory: 2500Mi
+            memory: 2500Gi
+          requests:
+            cpu: "0.10"
+            memory: 100Mi
 #       volumeMounts:
 #       - name: data-volume
 #         mountPath: /data
