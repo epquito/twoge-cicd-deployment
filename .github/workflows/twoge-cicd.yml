@@ -60,7 +60,7 @@ jobs:
 
       - name: deploy to eks 
         run: |
-          kubectl apply -f Namespace/ -n edwin 
+          kubectl apply -f NameSpace/ -n edwin 
 
       - name: deploy to eks 
         run: |
