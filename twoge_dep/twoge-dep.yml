@@ -18,8 +18,8 @@ spec:
         image: epquito/twoge-flask:v1
         resources:
           limits:
-            cpu: "1"
-            memory: 1Gi
+            cpu: "0.5"
+            memory: 500Gi
           requests:
             cpu: "0.5"
             memory: 500Mi
