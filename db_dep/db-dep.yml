@@ -19,12 +19,12 @@ spec:
 #        - name: db-data 
 #          mountPath: /var/lib/postgresql/data
         resources:
-          limits:
-            cpu: "0.25"
-            memory: 500Mi
           requests:
-            cpu: "0.10"
-            memory: 100Mi
+            cpu: "100m"
+            memory: "100Mi"
+          limits:
+            cpu: "200m"
+            memory: "200Mi"
         env:
         - name: POSTGRES_USER
           valueFrom:
