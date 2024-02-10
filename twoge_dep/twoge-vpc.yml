@@ -7,7 +7,7 @@ spec:
   storageClassName: twoge-storage
   resources:
     requests:
-      storage: 100mi 
+      storage: 100Mi 
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
