@@ -60,17 +60,17 @@ jobs:
 
       - name: deploy to eks 
         run: |
-          kubectl apply -f NameSpace/ -n edwin 
+          kubectl apply -f NameSpace/ -n default
 
       - name: deploy to eks 
         run: |
-          kubectl apply -f db_dep/ -n edwin 
+          kubectl apply -f db_dep/ -n default
 
       - name: delay for 15
         run: sleep 15 
       
       - name: delpy eks 
         run: |
-          kubectl apply -f twoge_dep/ -n edwin  
+          kubectl apply -f twoge_dep/ -n deafult 
 
       
