@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ResourceQuota
 metadata:
   name: db-quota
-  namespace: edwin
+  namespace: default
 spec:
   hard:
     pods: 10
