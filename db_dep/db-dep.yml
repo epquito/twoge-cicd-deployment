@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: twoge-db
-  namespace: default
+  namespace: edwin
 spec:
   selector:
     matchLabels:
@@ -15,9 +15,9 @@ spec:
       containers:
       - name: twoge-db
         image: postgres
-        volumeMounts:
-        - name: db-data 
-          mountPath: /var/lib/postgresql/data
+        # volumeMounts:
+        # - name: db-data 
+        #   mountPath: /var/lib/postgresql/data
         resources:
           requests:
             cpu: "100m"
@@ -57,8 +57,8 @@ spec:
               - cp2023
         ports:
         - containerPort: 5432
-      volumes:
-      - name: db-data
-        persistentVolumeClaim:
-          claimName: db-vpc
+      # volumes:
+      # - name: db-data
+      #   persistentVolumeClaim:
+      #     claimName: db-vpc
 
