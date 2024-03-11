@@ -1,0 +1,17 @@
+#To use minikube storage class use th code below
+# apiVersion: storage.k8s.io/v1
+# kind: StorageClass
+# metadata:
+#   name: twoge-storage
+#   namespace: <Namespace name>
+# provisioner: k8s.io/minikube-hostpath
+
+# To use sotrage class on AWS EKS use the code below
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: twoge-storage 
+  namespace: <Namespace name>
+provisioner: ebs.csi.aws.com
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true

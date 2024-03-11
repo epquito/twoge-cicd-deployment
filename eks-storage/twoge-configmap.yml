@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: twoge-configmap
-  namespace: edwin 
-data:
-  db_host: postgresql://cp2023:edwin2023@db-service:5432/twoge

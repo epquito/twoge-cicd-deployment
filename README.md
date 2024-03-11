@@ -21,12 +21,51 @@ CMD ["gunicorn"  , "--bind", "0.0.0.0:80", "app:app"]
 
 ```
 ## Above me is the contents of the Dockerfile I'm going to use
+
 - how to push Dockerfile image to docker repo 
+
 ```bash
 docker build -t "<docker-username>/<docker-image-name>:<tag>" -f <specific dockerfile> .
 docker push <docker-username>/<docker-image-name>:<tag>
 ```
+## After creating the dockerfile you can test if the image works by a quick deployment of Docker compose
 
+```bash
+version: '3'
+services:
+  app:
+    container_name: 'twoge'
+    build: . # Refrences the Dockerfile within the same Directory
+    ports: 
+      - "80:80" # opens the port 
+    environment:
+      - SQLALCHEMY_DATABASE_URI=postgresql://<username>:<password>@<db_host>:5432/<database> #declare the env variables within the app
+    depends_on: # Before deploying the app it waits for the database to fully spin up
+      db:
+        condition: service_healthy
+    networks:
+      - twoge-networks # uses it's own bridge network 
+  db:
+    image: 'postgres'
+    container_name: 'twoge-db'
+    networks:
+      - twoge-networks
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=<user>
+      - POSTGRES_PASSWORD=<password>
+      - POSTGRES_DB=<database>
+    healthcheck:
+      test: ["CMD","pg_isready","-q","-d","<database>","-U","<username>"] #Exec this command inside container to check health of database
+      timeout: 20s
+      retries: 10
+  
+networks: # refrences the network being created for these containers
+  twoge-networks:
+    name: twoge-networks
+    driver: bridge 
+```
 ## Start up Minikube
 ```bash
 minikube start
@@ -38,7 +77,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: twoge-db
-  namespace: edwin
+  namespace: <Namespace name>
 spec:
   selector:
     matchLabels:
@@ -53,7 +92,7 @@ spec:
         image: postgres
         volumeMounts:
         - name: db-data 
-          mountPath: /var/lib/postgresql/data
+          mountPath: /var/lib/postgresql/data_backup
         resources:
           requests:
             cpu: "100m"
@@ -97,7 +136,6 @@ spec:
       - name: db-data
         persistentVolumeClaim:
           claimName: db-vpc
-
 ```
 - db_dep/db-secret.yml:
 
@@ -106,21 +144,22 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: db-secret
-  namespace: edwin 
+  namespace: <Namespace name>
 type: Opaque
 data:
-  username: Y3AyMDIz 
-  database: dHdvZ2U= 
-  password: ZWR3aW4yMDIzCg== 
-  port: NTQzMg== 
+  username: <base64> #username encrypted
+  database: <base64> #database encrypted
+  password: <base64> #password encrypted
+  port: <base64> #port encrypted
 ```
 - db_dep/db-svc.yml:
+
 ```bash
 apiVersion: v1
 kind: Service
 metadata:
   name: db-service
-  namespace: edwin
+  namespace: <Namespace name>
 spec:
   selector:
     app: twoge-db
@@ -129,33 +168,36 @@ spec:
   - port: 5432
     targetPort: 5432
 ```
-- db_dep/db-storage.yml:
-```bash
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: db-storage
-  namespace: edwin
-provisioner: k8s.io/minikube-hostpath
 
+- db_dep/db-storage.yml:
+
+```bash
+# To use minikube storge class use the code below.
 # apiVersion: storage.k8s.io/v1
 # kind: StorageClass
 # metadata:
 #   name: db-storage
-#   namespace: edwin
-# provisioner: ebs.csi.aws.com
-# volumeBindingMode: WaitForFirstConsumer
-# allowVolumeExpansion: true
+#   namespace: <Namespace name>
+# provisioner: k8s.io/minikube-hostpath
 
-
+# To use storage class on AWS EKS Use the code below
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: db-storage
+  namespace: <Namespace name>
+provisioner: ebs.csi.aws.com
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
 ```
 - db_dep/db-quota:
+
 ```bash
 apiVersion: v1
 kind: ResourceQuota
 metadata:
   name: db-quota
-  namespace: edwin 
+  namespace: <Namespace name>
 spec:
   hard:
     pods: 10
@@ -165,12 +207,13 @@ spec:
     limits.memory: 4Gi
 ```
 - db-dep/db-pvc:
+
 ```bash
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: db-vpc
-  namespace: edwin
+  namespace: <Namespace name>
 spec:
   storageClassName: db-storage
   resources:
@@ -178,18 +221,18 @@ spec:
       storage: 2Gi  
   accessModes:
     - ReadWriteOnce
-
-
 ```
 
 ## Create twoge directory called "twoge_dep" to store Deployment, Secret, Service, StorageClass, PersistenVolumeClamim yml files
+
 - twoge_dep/twoge-dep.yml:
+
 ```bash
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: twoge
-  namespace: edwin
+  namespace: <Namespace name>
 spec:
   replicas: 1
   selector:
@@ -213,21 +256,12 @@ spec:
         volumeMounts:
         - name: data-volume
           mountPath: /data
-
         env:
         - name: SQLALCHEMY_DATABASE_URI
           valueFrom:
             secretKeyRef:
               name: twoge-secret
               key: db_url
-  
-        # - name: SQLALCHEMY_DATABASE_URI
-        #   valueFrom:
-        #     configMapKeyRef:
-        #       name: twoge-configmap
-        #       key: db_host
-
-
         readinessProbe:
           httpGet:
             path: /
@@ -248,55 +282,59 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: twoge-secret
-  namespace: edwin
+  namespace: <Namespace name>
 type: Opaque
 data:
   db_url: cG9zdGdyZXNxbDovL2NwMjAyMzplZHdpbjIwMjNAZGItc2VydmljZTo1NDMyL3R3b2dl
 ```
 - twoge_dep/twoge-svc.yml:
+
 ```bash
 apiVersion: v1
 kind: Service
 metadata:
   name: twoge-service 
-  namespace: edwin
+  namespace: <Namespace name>
 spec:
   selector:
     app: twoge
-  # type: LoadBalancer
-  type: NodePort
+# Load balancer is for AWS EKS and NodePort is for minikube
+  type: LoadBalancer
+  # type: NodePort
   ports:
   - protocol: TCP
     port: 80
     targetPort: 80
-    nodePort: 30005
-
 ```
 - twoge_dep/twoge-storage.yml:
+
 ```bash
+#To use minikube storage class use th code below
 # apiVersion: storage.k8s.io/v1
 # kind: StorageClass
 # metadata:
-#   name: twoge-storage 
-#   namespace: edwin
-# provisioner: ebs.csi.aws.com
-# volumeBindingMode: WaitForFirstConsumer
-# allowVolumeExpansion: true
+#   name: twoge-storage
+#   namespace: <Namespace name>
+# provisioner: k8s.io/minikube-hostpath
 
+# To use sotrage class on AWS EKS use the code below
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: twoge-storage
-  namespace: edwin
-provisioner: k8s.io/minikube-hostpath
+  name: twoge-storage 
+  namespace: <Namespace name>
+provisioner: ebs.csi.aws.com
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
 ```
 - twoge_dep/twoge-pvc:
+
 ```bash
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: twoge-vpc
-  namespace: edwin
+  namespace: <Namespace name>
 spec:
   storageClassName: twoge-storage
   resources:
@@ -305,48 +343,48 @@ spec:
   accessModes:
     - ReadWriteOnce
 
-
 ```
 ## Create a final directory called "NameSpace" to store namespace
 ```bash
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: edwin
+  name: <Namespace name>
 ```
 ## Once all the directories with there respected config yml files are created you can deploy them now
+
 - Always deploy database first 
 
 ```bash
-kubectl apply -f db_dep/ -n edwin
-kubectl get all -n edwin
-kubectl get pvc -n edwin 
-kubectl get storageclass -n edwin
+kubectl apply -f db_dep/ -n <namespace>
+kubectl get all -n <namespace>
+kubectl get pvc -n <namespace>
+kubectl get storageclass -n <namespace>
 ```
 - To check logs and desciribe pod:
 
 ```bash
-kubectl logs <pod name> -n edwin
-kubectl describe <pod-name> -n edwin
+kubectl logs <pod name> -n <namespace>
+kubectl describe <pod-name> -n <namespace>
 ```
 - To describe pvc and storageclass
 
 ```bash
-kubectl describe pvc <pvc name> -n edwin 
-kubectl describe storageclass <storageclass name> -n edwin
+kubectl describe pvc <pvc name> -n <namespace>
+kubectl describe storageclass <storageclass name> -n <namespace>
 ```
 - deploy twoge app  
 
 ```bash
-kubectl apply -f twoge/ -n edwin
-kubectl get all -n edwin
-kubectl get pvc -n edwin 
-kubectl get storageclass -n edwin
+kubectl apply -f twoge/ -n <namespace>
+kubectl get all -n <namespace>
+kubectl get pvc -n <namespace>
+kubectl get storageclass -n <namespace>
 ```
 
 - to access the web app on minikube
 
 ```bash
-kubectl service <service name> --url -n edwin 
+kubectl service <service name> --url -n <namespace> 
 # once url is populted hold CTRL and click on the url 
 ```

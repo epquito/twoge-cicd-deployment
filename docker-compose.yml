@@ -4,9 +4,9 @@ services:
     container_name: 'twoge'
     build: .
     ports: 
-      - "8080:8080"
+      - "80:80"
     environment:
-      - SQLALCHEMY_DATABASE_URI=postgresql://twoge:twoge@twoge-db:5432/twoge
+      - SQLALCHEMY_DATABASE_URI=postgresql://<username>:<password>@<db_host>:5432/<database>
     depends_on:
       db:
         condition: service_healthy
@@ -20,11 +20,11 @@ services:
     ports:
       - '5432:5432'
     environment:
-      - POSTGRES_USER=twoge
-      - POSTGRES_PASSWORD=twoge
-      - POSTGRES_DB=twoge
+      - POSTGRES_USER=<user>
+      - POSTGRES_PASSWORD=<password>
+      - POSTGRES_DB=<database>
     healthcheck:
-      test: ["CMD","pg_isready","-q","-d","movies","-U","edwin"]
+      test: ["CMD","pg_isready","-q","-d","<database>","-U","<username>"]
       timeout: 20s
       retries: 10
   

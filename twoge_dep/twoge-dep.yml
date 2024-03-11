@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: twoge
-  namespace: edwin
+  namespace: <Namespace name>
 spec:
   replicas: 1
   selector:
@@ -23,24 +23,15 @@ spec:
           limits:
             cpu: "100m"
             memory: "100Mi"
-        # volumeMounts:
-        # - name: data-volume
-        #   mountPath: /data
-
+        volumeMounts:
+        - name: data-volume
+          mountPath: /data
         env:
         - name: SQLALCHEMY_DATABASE_URI
           valueFrom:
             secretKeyRef:
               name: twoge-secret
               key: db_url
-  
-        # - name: SQLALCHEMY_DATABASE_URI
-        #   valueFrom:
-        #     configMapKeyRef:
-        #       name: twoge-configmap
-        #       key: db_host
-
-
         readinessProbe:
           httpGet:
             path: /
@@ -49,7 +40,7 @@ spec:
           periodSeconds: 5
         ports:
         - containerPort: 80
-      # volumes: 
-      # - name: data-volume
-      #   persistentVolumeClaim:
-      #     claimName: twoge-vpc
+      volumes: 
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: twoge-vpc
