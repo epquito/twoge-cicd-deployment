@@ -1,4 +1,7 @@
 # Twoge web app deployment on Minikube/EKS wih CI/CD in github actions
+## Twoge AWS Diagram:
+
+  ![Alt Text](https://github.com/epquito/twoge-cicd-deployment/twoge-eks-cicd.jpeg)
 
 ## Prerequiste:
 - Dockerhub account
