@@ -73,7 +73,7 @@ networks: # refrences the network being created for these containers
 ```bash
 minikube start
 ```
-## Create database directory called "db-dep" to store Deployment, Secret, Service, StorageClass, Resource quota, PersistenVolumeClamim yml files
+## Create database directory called "db-dep" to store Deployment, Secret, Service, StorageClass, Resource quota, Persistent Volume Claim yml files
 - db_dep/db-dep.yml:
 ```bash
 apiVersion: apps/v1
